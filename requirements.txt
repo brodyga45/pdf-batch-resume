@@ -1,0 +1,2 @@
+pypdf[image]==6.10.0
+Pillow==12.3.0
