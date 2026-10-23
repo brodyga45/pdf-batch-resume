@@ -292,6 +292,12 @@ def run_batch(args) -> int:
 
 
 def main(argv=None) -> int:
+    # Redirected Windows consoles can use legacy encodings (for example cp1252).
+    # A filename that cannot be displayed must never stop the remaining queue.
+    # Keep the stream's chosen encoding; escape only unrepresentable characters.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="backslashreplace")
     if argv is None and sys.argv[1:] == ["--worker"]:
         try:
             result = worker(json.load(sys.stdin))

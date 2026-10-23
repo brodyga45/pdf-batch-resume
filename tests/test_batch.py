@@ -2,6 +2,7 @@
 import csv
 import hashlib
 import json
+import os
 import random
 from pathlib import Path
 import shutil
@@ -60,7 +61,7 @@ class BatchIntegration(unittest.TestCase):
         p = subprocess.run([sys.executable, str(ROOT / "pdfbatch.py"), str(self.src), str(self.out), *extra],
                            text=True, capture_output=True, timeout=40)
         reports = sorted(self.out.glob("batch-report-*.json"), key=lambda f: f.stat().st_mtime_ns)
-        return p, json.loads(reports[-1].read_text()) if reports else None
+        return p, json.loads(reports[-1].read_text(encoding="utf-8")) if reports else None
 
     def test_compression_original_hashes_and_exact_resume(self):
         original = self.src / "nested" / "chart.PDF"
@@ -159,6 +160,27 @@ class BatchIntegration(unittest.TestCase):
         p, _ = self.run_cli()
         self.assertEqual(p.returncode, 1)
         self.assertFalse(self.out.exists())
+
+    def test_legacy_console_unicode_paths_do_not_stop_queue(self):
+        name = "извештај 😀.pdf"
+        pdf(self.src / name)
+        pdf(self.src / "z-after.pdf")
+        before = pdfbatch.digest(self.src / name)
+        env = dict(os.environ, PYTHONIOENCODING="ascii:strict")
+        command = [sys.executable, str(ROOT / "pdfbatch.py"), str(self.src), str(self.out)]
+        first = subprocess.run(command, env=env, capture_output=True, timeout=40)
+        self.assertEqual(first.returncode, 0, first.stderr.decode("ascii"))
+        self.assertIn(b"\\u0438", first.stdout)
+        self.assertTrue((self.out / name).is_file())
+        self.assertTrue((self.out / "z-after.pdf").is_file())
+        self.assertEqual(before, pdfbatch.digest(self.src / name))
+        report = json.loads(max(self.out.glob("batch-report-*.json"),
+                                key=lambda p: p.stat().st_mtime_ns).read_text(encoding="utf-8"))
+        self.assertEqual(report["completed"], 2)
+        self.assertIn(name, [row["path"] for row in report["files"]])
+        resumed = subprocess.run(command + ["--resume"], env=env, capture_output=True, timeout=40)
+        self.assertEqual(resumed.returncode, 0, resumed.stderr.decode("ascii"))
+        self.assertEqual(resumed.stdout.count(b"resumed:"), 2)
 
     def test_symlink_output_does_not_create_outside_directories(self):
         pdf(self.src / "linked" / "new" / "a.pdf")
