@@ -162,7 +162,7 @@ class BatchIntegration(unittest.TestCase):
         self.assertFalse(self.out.exists())
 
     def test_legacy_console_unicode_paths_do_not_stop_queue(self):
-        name = "извештај 😀.pdf"
+        name = "a-извештај 😀.pdf"
         pdf(self.src / name)
         pdf(self.src / "z-after.pdf")
         before = pdfbatch.digest(self.src / name)
@@ -177,7 +177,7 @@ class BatchIntegration(unittest.TestCase):
         report = json.loads(max(self.out.glob("batch-report-*.json"),
                                 key=lambda p: p.stat().st_mtime_ns).read_text(encoding="utf-8"))
         self.assertEqual(report["completed"], 2)
-        self.assertIn(name, [row["path"] for row in report["files"]])
+        self.assertEqual([row["path"] for row in report["files"]], [name, "z-after.pdf"])
         resumed = subprocess.run(command + ["--resume"], env=env, capture_output=True, timeout=40)
         self.assertEqual(resumed.returncode, 0, resumed.stderr.decode("ascii"))
         self.assertEqual(resumed.stdout.count(b"resumed:"), 2)

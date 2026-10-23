@@ -2,7 +2,7 @@
 
 Compress a folder of image-heavy PDFs, one document at a time. A broken or slow file gets its own report entry; the remaining queue continues. Stop with Ctrl+C and resume completed files using verified hashes. All processing stays on your computer.
 
-This is a Python command-line tool, version 0.1.0. It is useful when a large batch fails and you want separate output copies, progress, and a list of exceptions. It uses pypdf and Pillow, not a new PDF compression algorithm.
+This is a Python command-line tool, version 0.1.1. It is useful when a large batch fails and you want separate output copies, progress, and a list of exceptions. It uses pypdf and Pillow, not a new PDF compression algorithm.
 
 ## Install and run
 
@@ -45,6 +45,8 @@ Run the identical command with `--resume`:
 
 The tool verifies the source hash, options and output hash before skipping a file. Each PDF gets a fresh worker process and a 120-second timeout; adjust it with `--timeout 300` for large documents. Only one batch may use an output folder at a time.
 
+On terminals that cannot display a filename, progress uses escaped characters instead of stopping the queue. The filenames and UTF-8 JSON/CSV reports keep their original Unicode text.
+
 Existing output files are never overwritten. If a source or output changed, or the options differ, use a new output folder or review the conflicting file yourself. A hard OS shutdown during the final copy can leave an untracked partial output; resume reports the conflict for review instead of adopting or replacing it. Ctrl+C saves completed work; the interrupted file is retried.
 
 ## Read the result
@@ -71,9 +73,13 @@ Before publication of an output, page count, page boxes, rotation and extracted 
 
 The included integration tests generate synthetic PDFs and exercise real processing, corruption, protection, timeouts, resume, conflicts, hashes, paths, locking and CSV output. A separate 800-file queue check uses one image-heavy synthetic PDF and 799 small text PDFs (mostly repeated copies). It tests orchestration, not 800 different production documents. The before/after sample was rendered with Poppler and visually inspected.
 
-Actual run details are in `QA.md`. Testing so far is on macOS with Python 3.12.14, pypdf 6.10.0 and Pillow 12.3.0. Windows and Linux execution, the requester's OS and their actual PDFs remain unverified. No customer files were used and no customer result or sale is claimed.
+Actual run details are in `QA.md`. The original checks ran on macOS with Python 3.12.14. Version 0.1.1 also passed 12 integration tests on GitHub-hosted Windows Server 2022 (Python 3.12.10, cp1252) and Ubuntu 24.04 (Python 3.12.15), with pypdf 6.10.0 and Pillow 12.3.0. This checks the command-line engine; a Windows 10/11 desktop installation, the requester's OS and their actual PDFs remain unverified. No customer files were used and no customer result or sale is claimed.
 
 Developers can run `python -m pip install reportlab==4.4.9` and `python -m unittest discover -s tests -v`. `python tests/scale_check.py` creates the synthetic queue under `qa/scale`; use a fresh extracted folder for another scale run.
+
+## Source and reproducible checks
+
+Source and Windows/Linux integration runs: https://github.com/brodyga45/pdf-batch-resume .
 
 ## License
 

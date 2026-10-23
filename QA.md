@@ -7,7 +7,7 @@
 - Image sample: 5485463 bytes before, 1146987 after. Pixel resizing and JPEG are lossy; this sample does not establish a general reduction percentage.
 - Poppler renders of that sample before/after were inspected: matching page layout, title, bars and chart geometry; expected image colour/detail differences. Poppler emitted local fontconfig cache warnings; both renders completed. No claim of fine scanned-text fidelity follows from this chart.
 - Corruption, protected PDFs, real worker timeouts followed by successful retry, existing-output preservation, changed source and tampering, overlap refusal, directory/source symlinks, locking, CSV formula escaping and three-page crop/rotation/text checks passed.
-- Windows/Linux runtime, customer OS/documents, extreme memory pressure and abrupt power loss were not tested. A hard shutdown can leave an untracked output requiring review. No malware-sandbox claim.
+- At this original macOS checkpoint, Windows/Linux runtime, customer OS/documents, extreme memory pressure and abrupt power loss were not tested. The later 0.1.1 CI results below supersede only the Windows/Linux engine-runtime gap. A hard shutdown can leave an untracked output requiring review. No malware-sandbox claim.
 - No customer files, accounts, payments or uploads are part of these tests. Original source code is MIT; dependencies are separately licensed.
 
 ## Additional fine-print sample and independent review
@@ -15,3 +15,14 @@
 A second synthetic 300-dpi raster page includes 6/8/10/12-point text, document IDs, amounts and a table on a lightly noisy background. Default settings produced 302,437 bytes from 7,742,515 bytes. Before/after were rendered at150dpi and visually read: all displayed sample lines and numbers remained readable, with expected JPEG softening. This single sample does not establish readability for customer documents.
 
 Rasp independently tested the frozen source archive: a bad middle PDF did not stop a following valid file; verified resume preserved outputs; after replacing the bad input, the queue completed. Original hashes were retained. Rasp observed the chart's title absent in one Poppler rendering environment while PDFium rendered the title in both PDFs; this author's Poppler renders also show it in both. Text/font/content checks did not establish title deletion. Treat this as renderer-dependent uncertainty, not proven universal fidelity or universal corruption. Compare outputs in your actual viewer before trusting a batch.
+
+
+## Version 0.1.1 — actual Windows/Linux check and Unicode fix
+
+The first public CI run reproduced a real Windows failure: with cp1252 output, printing a Cyrillic filename raised UnicodeEncodeError and stopped the queue. Linux passed all 11 original tests. Source: https://github.com/brodyga45/pdf-batch-resume/actions/runs/40006740826 .
+
+Commit e1cd301c6c51d3aeabde2e6fb7e1057645969de8 keeps the existing stdout/stderr encoding and uses backslash escapes for characters it cannot display. Actual files and UTF-8 reports retain their Unicode names. A real subprocess regression forces ASCII output, processes a Cyrillic/emoji filename and another PDF, verifies the original hash and Unicode report path, and resumes both completed outputs.
+
+The corrected run passed all 12 integration tests on both Windows Server 2022 x64/Python 3.12.10/cp1252 (9.308 seconds) and Ubuntu 24.04 x64/Python 3.12.15 (8.186 seconds). Source: https://github.com/brodyga45/pdf-batch-resume/actions/runs/40006959962 . These timings are for the small generated integration fixtures, not an 800-file workload.
+
+This is hosted command-line engine testing, not proof of a Windows 10/11 desktop installation, an executable installer, customer document quality, or customer acceptance. No customer data was used.
