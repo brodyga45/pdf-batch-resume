@@ -60,8 +60,12 @@ def create_window(root):
             self.status = tk.StringVar(value="Choose folders, then Start / Continue.")
             self.report = tk.StringVar()
             root.title("PDF Batch Resume")
-            root.geometry("900x680")
-            root.minsize(710, 560)
+            # Keep the lower instructions above desktop taskbars on small
+            # displays; let the log shrink instead of hiding fixed controls.
+            available_width = max(420, root.winfo_screenwidth() - 50)
+            available_height = max(400, root.winfo_screenheight() - 120)
+            root.geometry(f"{min(900, available_width)}x{min(680, available_height)}+20+20")
+            root.minsize(min(710, available_width), min(560, available_height))
             root.protocol("WM_DELETE_WINDOW", self.close)
             root.columnconfigure(0, weight=1)
             root.rowconfigure(0, weight=1)
