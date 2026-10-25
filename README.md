@@ -14,7 +14,7 @@ Requires Python 3.10 or newer with Tcl/Tk, available from the [official Python W
 
 The default smaller-image mode is lossy. Try a few representative copies and inspect small text and diagrams before a large batch. **Keep image pixels** avoids image re-encoding; size savings may be small or zero.
 
-The window shows progress and per-file exceptions. **Stop after current PDF** lets the active PDF and its journal entry finish, then stops. It can take up to the per-file timeout. Closing an active window also waits for that safe stop. Choose the same folders and settings and press **Start / Continue** to verify and reuse completed outputs. Changes or conflicts are reported; files are not silently overwritten.
+The window shows progress and per-file exceptions. **Stop after current PDF** lets the active PDF and its journal entry finish, then stops. Closing an active window also waits for that safe stop. The worker timeout does not cover hashing, copying or journal writes, so slow storage can make stopping take longer. Choose the same folders and settings and press **Start / Continue** to verify and reuse completed outputs. Changes or conflicts are reported; files are not silently overwritten.
 
 The JSON and CSV reports are written when the queue finishes. A safely stopped queue keeps its resume journal; continue it to produce a full report. After completion, the report path can be selected/copied from the window, and per-file reasons remain in the log. The GUI runs locally, without a web server or document uploads.
 
