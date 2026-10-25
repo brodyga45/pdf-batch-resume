@@ -26,3 +26,14 @@ Commit e1cd301c6c51d3aeabde2e6fb7e1057645969de8 keeps the existing stdout/stderr
 The corrected run passed all 12 integration tests on both Windows Server 2022 x64/Python 3.12.10/cp1252 (9.308 seconds) and Ubuntu 24.04 x64/Python 3.12.15 (8.186 seconds). Source: https://github.com/brodyga45/pdf-batch-resume/actions/runs/40006959962 . These timings are for the small generated integration fixtures, not an 800-file workload.
 
 This is hosted command-line engine testing, not proof of a Windows 10/11 desktop installation, an executable installer, customer document quality, or customer acceptance. No customer data was used.
+
+
+## Version 0.2.0 — graphical launch and progress
+
+The existing engine now has a Tk desktop entry point. GitHub Actions run [40184705996](https://github.com/brodyga45/pdf-batch-resume/actions/runs/40184705996), source `a2fd93db6bd0dcb83e4f5feae500a63d10003e64`, passed all 17 tests on both Windows Server 2022 and Ubuntu 24.04 with Python 3.12. The actual-window test ran on both systems (Linux used Xvfb); it was not skipped.
+
+The real window started a synthetic damaged PDF followed by a valid PDF, displayed the exception and report path, then continued and verified the existing output. Four controller tests also exercised worker events, safe stop between documents with a saved journal, resume, validation, path preservation and report results. Local macOS ran 16 tests with one explicit GUI skip; its GUI is unverified.
+
+Independent review found that the active filename appeared too late and the Windows taskbar obscured the bottom note. The current source emits the filename before hashing/processing and fits the initial window inside the display. Corrected Windows and Ubuntu screenshot/JSON artifacts from this run were downloaded through the connected GitHub tool; their SHA256 and ZIP CRC matched the original metadata. Windows artifact digest: `e659d07bb24ab36ecd050b92d9553b21dff33cb7e18f2793d2940be65d1f23d1`; Ubuntu: `33c7b6b2762bd5b562e5be6d18c59f7befa5ae388bc0d284c02f0642e8c65dc0`. Both bottom lines are visible; Rasp closed the two GUI findings and supported release within these limits.
+
+This is synthetic hosted desktop evidence. The native folder picker, clicking the live Stop button or window close control, physical Windows 10/11 installation and customer PDFs were not exercised. Safe-stop controller/engine tests do not establish those native interactions. The earlier renderer-dependent PDF display uncertainty remains. No new compression algorithm, customer acceptance or sale is claimed.

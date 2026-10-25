@@ -2,7 +2,7 @@
 
 Compress a folder of image-heavy PDFs, one document at a time. A broken or slow file gets its own report entry; the remaining queue continues. Stop with Ctrl+C and resume completed files using verified hashes. All processing stays on your computer.
 
-This is version 0.2.0 candidate: the existing Python command-line engine plus a desktop folder picker and progress window. It is useful when a large batch fails and you want separate output copies, progress, and a list of exceptions. It uses pypdf and Pillow, not a new PDF compression algorithm. Graphical compatibility checks are pending on this development branch; the published 0.1.1 command-line checks below are historical evidence.
+Version 0.2.0 adds a desktop folder picker and progress window to the existing Python engine. Choose two folders, start the batch, and see which files need attention. Stop after the active PDF and continue completed work with verified hashes. Compression uses pypdf and Pillow.
 
 ## Graphical launch on Windows
 
@@ -89,7 +89,9 @@ Before publication of an output, page count, page boxes, rotation and extracted 
 
 The included integration tests generate synthetic PDFs and exercise real processing, corruption, protection, timeouts, resume, conflicts, hashes, paths, locking and CSV output. A separate 800-file queue check uses one image-heavy synthetic PDF and 799 small text PDFs (mostly repeated copies). It tests orchestration, not 800 different production documents. The before/after sample was rendered with Poppler and visually inspected.
 
-Actual run details are in `QA.md`. The original checks ran on macOS with Python 3.12.14. Version 0.1.1 also passed 12 integration tests on GitHub-hosted Windows Server 2022 (Python 3.12.10, cp1252) and Ubuntu 24.04 (Python 3.12.15), with pypdf 6.10.0 and Pillow 12.3.0. This checks the command-line engine; a Windows 10/11 desktop installation, the requester's OS and their actual PDFs remain unverified. No customer files were used and no customer result or sale is claimed.
+Version 0.2.0 passed all 17 tests on GitHub-hosted Windows Server 2022 and Ubuntu 24.04, including an actual Tk window processing a damaged and a valid PDF, showing the report, and continuing verified work. See the [checked run](https://github.com/brodyga45/pdf-batch-resume/actions/runs/40184705996) and `QA.md`. Native folder dialogs, clicking Stop/closing the live window, and installation on a physical Windows 10/11 computer were not exercised.
+
+The original checks ran on macOS with Python 3.12.14. Version 0.1.1 also passed 12 integration tests on GitHub-hosted Windows Server 2022 (Python 3.12.10, cp1252) and Ubuntu 24.04 (Python 3.12.15), with pypdf 6.10.0 and Pillow 12.3.0. This checks the command-line engine; a Windows 10/11 desktop installation, the requester's OS and their actual PDFs remain unverified. No customer files were used and no customer result or sale is claimed.
 
 Developers can run `python -m pip install reportlab==4.4.9` and `python -m unittest discover -s tests -v`. `python tests/scale_check.py` creates the synthetic queue under `qa/scale`; use a fresh extracted folder for another scale run.
 
