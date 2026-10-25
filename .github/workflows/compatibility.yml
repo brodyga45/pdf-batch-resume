@@ -25,5 +25,22 @@ jobs:
         run: python -m pip install -r requirements.txt reportlab==4.4.9
       - name: Report actual runtime
         run: python -c "import sys, platform, locale; print(sys.version); print(platform.platform()); print(locale.getpreferredencoding(False)); print(sys.stdout.encoding)"
-      - name: Exercise real workers, compression, corruption, resume, locks and Unicode paths
+      - name: Exercise workers and actual desktop window on Windows
+        if: runner.os == 'Windows'
+        env:
+          PDFBATCH_REQUIRE_GUI: '1'
         run: python -m unittest discover -s tests -v
+      - name: Exercise workers and actual desktop window on Linux virtual display
+        if: runner.os == 'Linux'
+        env:
+          PDFBATCH_REQUIRE_GUI: '1'
+        run: xvfb-run -a python -m unittest discover -s tests -v
+      - name: Preserve synthetic desktop smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-smoke-${{ matrix.os }}
+          path: |
+            qa/gui-smoke.json
+            qa/gui-smoke.png
+          if-no-files-found: warn

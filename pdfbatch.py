@@ -175,7 +175,12 @@ def spreadsheet_cell(value):
     return value
 
 
-def run_batch(args) -> int:
+def run_batch(args, *, on_event=None, stop_requested=None) -> int:
+    """Run the same queue for CLI or GUI; callbacks run on the calling thread.
+
+    A requested GUI stop is honoured between PDFs, after the current file and
+    its journal entry finish. It never terminates a worker during publication.
+    """
     source = Path(args.input).expanduser().resolve(strict=True)
     output = Path(args.output).expanduser().resolve()
     if not source.is_dir():
@@ -204,6 +209,8 @@ def run_batch(args) -> int:
         started = time.monotonic()
         try:
             for index, path in enumerate(files, 1):
+                if stop_requested is not None and stop_requested():
+                    raise KeyboardInterrupt
                 relative = path.relative_to(source).as_posix()
                 record = {"path": relative, "options": options, "input_bytes": 0, "output_bytes": 0}
                 temporary = None
@@ -264,9 +271,17 @@ def run_batch(args) -> int:
                     if old.get("status") not in SUCCESS:
                         state["files"][relative] = record
                 atomic_json(state_file, state)
-                print(f"[{index}/{len(files)}] {record['status']}: {relative}", flush=True)
+                if on_event is None:
+                    print(f"[{index}/{len(files)}] {record['status']}: {relative}", flush=True)
+                else:
+                    on_event({"type": "progress", "index": index,
+                              "total": len(files), "record": dict(record)})
         except KeyboardInterrupt:
-            print("Stopped. Completed files are saved. Run the same command with --resume.", file=sys.stderr)
+            if on_event is None:
+                print("Stopped. Completed files are saved. Run the same command with --resume.", file=sys.stderr)
+            else:
+                on_event({"type": "stopped", "completed_records": len(records),
+                          "total": len(files)})
             return 130
         stamp = time.strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:8]
         summary_path = output / f"batch-report-{stamp}.json"
@@ -287,7 +302,11 @@ def run_batch(args) -> int:
             csv_writer.writeheader()
             for record in records:
                 csv_writer.writerow({key: spreadsheet_cell(record.get(key, "")) for key in columns})
-        print(f"Finished: {summary['completed']}/{len(files)} complete; {len(review)} need review.\nReport: {summary_path}")
+        if on_event is None:
+            print(f"Finished: {summary['completed']}/{len(files)} complete; {len(review)} need review.\nReport: {summary_path}")
+        else:
+            on_event({"type": "finished", "summary": summary,
+                      "report": str(summary_path), "csv": str(csv_path)})
         return 2 if review else 0
 
 

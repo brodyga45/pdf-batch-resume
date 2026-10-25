@@ -2,7 +2,23 @@
 
 Compress a folder of image-heavy PDFs, one document at a time. A broken or slow file gets its own report entry; the remaining queue continues. Stop with Ctrl+C and resume completed files using verified hashes. All processing stays on your computer.
 
-This is a Python command-line tool, version 0.1.1. It is useful when a large batch fails and you want separate output copies, progress, and a list of exceptions. It uses pypdf and Pillow, not a new PDF compression algorithm.
+This is version 0.2.0 candidate: the existing Python command-line engine plus a desktop folder picker and progress window. It is useful when a large batch fails and you want separate output copies, progress, and a list of exceptions. It uses pypdf and Pillow, not a new PDF compression algorithm. Graphical compatibility checks are pending on this development branch; the published 0.1.1 command-line checks below are historical evidence.
+
+## Graphical launch on Windows
+
+Requires Python 3.10 or newer with Tcl/Tk, available from the [official Python Windows downloads](https://www.python.org/downloads/windows/). Keep the whole extracted folder together.
+
+1. Double-click `Setup Windows.cmd` once. It creates a `.venv` in this folder and downloads the pinned packages from PyPI. Wait for **Ready**; setup errors are shown rather than hidden.
+2. Double-click `Start Windows.cmd`.
+3. Browse for the original PDF folder and a separate output folder. Choose image quality, then **Start / Continue**.
+
+The default smaller-image mode is lossy. Try a few representative copies and inspect small text and diagrams before a large batch. **Keep image pixels** avoids image re-encoding; size savings may be small or zero.
+
+The window shows progress and per-file exceptions. **Stop after current PDF** lets the active PDF and its journal entry finish, then stops. It can take up to the per-file timeout. Closing an active window also waits for that safe stop. Choose the same folders and settings and press **Start / Continue** to verify and reuse completed outputs. Changes or conflicts are reported; files are not silently overwritten.
+
+The JSON and CSV reports are written when the queue finishes. A safely stopped queue keeps its resume journal; continue it to produce a full report. After completion, the report path can be selected/copied from the window, and per-file reasons remain in the log. The GUI runs locally, without a web server or document uploads.
+
+On another Python installation with working Tcl/Tk, the direct entry point is `python pdfbatch_gui.py` after installing `requirements.txt`. macOS GUI execution is not verified. The command-line instructions remain available for Python builds without Tk.
 
 ## Install and run
 
