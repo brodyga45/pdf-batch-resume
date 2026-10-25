@@ -212,6 +212,9 @@ def run_batch(args, *, on_event=None, stop_requested=None) -> int:
                 if stop_requested is not None and stop_requested():
                     raise KeyboardInterrupt
                 relative = path.relative_to(source).as_posix()
+                if on_event is not None:
+                    on_event({"type": "processing", "index": index,
+                              "total": len(files), "path": relative})
                 record = {"path": relative, "options": options, "input_bytes": 0, "output_bytes": 0}
                 temporary = None
                 try:

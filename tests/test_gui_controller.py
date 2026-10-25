@@ -46,6 +46,10 @@ class GraphicalQueueIntegration(unittest.TestCase):
         pdf(good)
         source_hash = pdfbatch.digest(good)
         events = self.run_controller()
+        self.assertEqual([e["type"] for e in events],
+                         ["processing", "progress", "processing", "progress", "finished", "exit"])
+        self.assertEqual(events[0]["path"], "a-broken.pdf")
+        self.assertEqual(events[2]["path"], good.name)
         progress = [e for e in events if e["type"] == "progress"]
         self.assertEqual([(e["index"], e["total"]) for e in progress], [(1, 2), (2, 2)])
         self.assertEqual(progress[0]["record"]["status"], "error")
@@ -75,7 +79,7 @@ class GraphicalQueueIntegration(unittest.TestCase):
 
         code = pdfbatch.run_batch(self.options(), on_event=receive, stop_requested=stop.is_set)
         self.assertEqual(code, 130)
-        self.assertEqual([e["type"] for e in events], ["progress", "stopped"])
+        self.assertEqual([e["type"] for e in events], ["processing", "progress", "stopped"])
         self.assertTrue((self.output / "a.pdf").is_file())
         self.assertFalse((self.output / "b.pdf").exists())
         state = json.loads((self.output / ".pdfbatch-state.json").read_text(encoding="utf-8"))

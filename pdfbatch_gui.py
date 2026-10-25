@@ -180,7 +180,12 @@ def create_window(root):
 
         def handle(self, event):
             kind = event["type"]
-            if kind == "progress":
+            if kind == "processing":
+                self.bar.configure(maximum=event["total"], value=event["index"] - 1)
+                if not self.stop.is_set():
+                    self.status.set(f"Processing {event['index']} of {event['total']}: {event['path']}. "
+                                    f"{event['index'] - 1} files processed.")
+            elif kind == "progress":
                 record = event["record"]
                 self.bar.configure(maximum=event["total"], value=event["index"])
                 self.append(f"[{event['index']}/{event['total']}] {record['status']}: {record['path']}")
